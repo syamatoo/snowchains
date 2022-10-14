@@ -613,12 +613,14 @@ impl<S: Shell> Exec<WatchSubmissions<Self, S>> for Atcoder<'_> {
 
         let mut sess = Session::new(timeout, Some(cookie_storage), &mut shell)?;
 
-        let (summaries, _) =
+        let (mut summaries, _) =
             retrieve_submission_summaries(&mut sess, &contest, 1, username_and_password)?;
 
         let any_incomplete = summaries.iter().any(|SubmissionSummary { status, .. }| {
             matches!(status, Verdict::Wj | Verdict::Judging(..))
         });
+
+        summaries.sort_by_key(|summary| summary.submission_time);
 
         if any_incomplete {
             watch_submissions(sess, &contest, &summaries)?;
